@@ -18,6 +18,8 @@
 %\setmainlanguage[]{french}
 \usepackage[top=30pt,bottom=50pt,left=48pt,right=46pt]{geometry}
 \usepackage{listings}
+\usepackage{svg}
+
 
 \lstset{
     language=C++
@@ -84,10 +86,40 @@ L'exécutable pour tester le produit matrice-matrice est \texttt{TestProduitMatr
 
 \begin{enumerate}
 	\item Mesurez le temps de calcul du produit matrice--matrice donné en donnant en entrée diverses dimensions. Essayez en particulier de prendre pour dimension 1023, 1024 et 1025 (il suffit de passer la dimension en argument à l'exécution. Par exemple \verb@./TestProductMatrix.exe 1023@ testera le produit matrice-matrice pour des matrices de dimension 1023). En vous servant des transparents du cours, expliquez clairement les temps obtenus.
+	
+	\textbf{Réponse :} Pour \( n = 1024 \), le temps de calcul du produit de matrices est beaucoup plus long que pour \( n = 1023 \) et \( n = 1025 \). Cela se produit systématiquement pour des valeurs correspondant à des puissances de 2 supérieures à la taille de bloc (\textbf{block size}) du cache du processeur. Dans le cas de mon processeur, cette taille est de 64 octets.  
+
+Ce problème s'explique par un alignement mémoire qui entraîne des conflits de cache constants. Comme \( 1024 \) est une puissance de 2, les adresses mémoire des éléments des matrices sont parfaitement alignées, ce qui peut rendre les accès moins efficaces en raison du \textbf{conflit de cache}. En revanche, pour \( n = 1023 \) et \( n = 1025 \), les accès ne suivent pas un schéma aussi rigoureusement aligné, ce qui réduit ces problèmes et permet d'obtenir de meilleures performances.
+	
 	\item \textbf{\color{blue}Première optimisation :} Permutez les  boucles en $i,j$ et $k$ jusqu'à obtenir un temps optimum pour le calcul du produit matrice--matrice (et après vous être persuadé que cela ne changera rien au résulat du calcul). Expliquez pourquoi la permutation des boucles optimale que vous avez trouvée
 	est bien la façon optimale d'ordonner les boucles en vous servant toujours du support de cours.
+	
+	\textbf{Réponse :} L'ordre \( j, k, i \) est le plus efficace, car il fixe d'abord une colonne de \( B \),
+	 puis une colonne de \( A \), et enfin parcourt les lignes de cette colonne de \( A \).
+	Cette approche est optimale en raison de la façon dont les matrices sont stockées en mémoire sous la forme d'un
+	vecteur unidimensionnel (\texttt{m\_arr\_coefs[row + col * nRows]}).
+	Comme les éléments d'une même colonne sont contigus en mémoire, cet ordre de boucle permet de les accéder de manière séquentielle,
+	exploitant ainsi la localité spatiale et réduisant les rechargements inutiles du cache.
+	De plus, la matrice \( B \) est également accédée de manière contiguë, minimisant ainsi les erreurs de cache
+	(\textbf{cache misses}). De cette façon, nous évitons les rechargements inutiles du cache et assurons un accès plus
+	efficace aux données, améliorant ainsi de manière significative les performances du produit matriciel.
+
 	\item \textbf{\color{blue}Première parallélisation :} A l'aide d'OpenMP, parallélisez le produit matrice--matrice. Mesurez le temps obtenu en variant le nombre de threads à l'aide de la variable d'environnement \texttt{OMP\_NUM\_THREADS}. Calculez l'accélération et le résultat obtenu en fonction du nombre de threads, commentez et expliquez clairement ces résultats. 
+	
+	\textbf{Réponse :} L'ajout de la directive \# pragma omp parallel for avant la boucle externe est suffisant pour une parallélisation initiale, car cela distribue les itérations de la boucle entre les threads, permettant à différentes parties de la multiplication de matrices d'être traitées simultanément. Cela se traduit par une réduction du temps d'exécution et une utilisation plus efficace des ressources informatiques disponibles.
+
+	\begin{figure}[H]
+		\centering
+		\includegraphics[width=\textwidth]{parallel1.pdf}
+		\caption{Speedup of matrix multiplication using OpenMP with varying thread counts.}
+	\end{figure}
+
 	\item Argumentez et donnez clairement la raison pour laquelle il est sûrement possible d'améliorer le résultat que vous avez obtenu.
+	
+	\textbf{Réponse :} 
+	
+	Il est nécessaire d'utiliser correctement la fonction \textbf{prodSubBlock} en parallélisant le calcul de la matrice dans des régions indépendantes. Cela permet d'optimiser l'utilisation du cache entre les processeurs, car chaque processeur travaille sur une partie spécifique de la mémoire, évitant ainsi de charger les mêmes données dans plusieurs caches. Par conséquent, il n'y a pas besoin de transférer les mêmes informations entre la mémoire principale et les caches à plusieurs reprises, ce qui diminue la latence d'accès à la mémoire et améliore considérablement les performances grâce à une meilleure gestion des ressources et un meilleur partage du travail.
+
 	\item \textbf{\color{blue}Deuxième optimisation :} Pour pouvoir exploiter au mieux la mémoire cache, on se propose de transformer notre produit matrice--matrice "scalaire" en produit matrice--matrice par bloc (on se servira pour le produit "bloc--bloc" de la meilleure version \textbf{séquentielle} du produit matrice--matrice obtenu précédemment).
 
 	L'idée est de décomposer les matrices $A,B$ et $C$ en sous-blocs matriciels :
@@ -126,11 +158,59 @@ C_{IJ} = \sum_{K=1}^{N}A_{IK}.B_{KJ}.
 \]
 
 Mettre en {\oe}uvre ce produit matrice--matrice en séquentiel puis faire varier la taille des blocs jusqu'à obtenir un optimum.
+
+
+\textbf{Réponse :} 
+Pour la prochaine étape de parallélisation, nous allons utiliser le code suivant :
+
+\begin{lstlisting}[caption={Parallélisation avec OpenMP}, label={lst:parallel}]
+  for (int iRowBlkA = 0; iRowBlkA < A.nbRows; iRowBlkA += szBlock)
+    for (int iColBlkB = 0; iColBlkB < B.nbCols; iColBlkB += szBlock)
+      for (int iColBlkA = 0; iColBlkA < A.nbCols; iColBlkA += szBlock)
+        prodSubBlocks(iRowBlkA, iColBlkB, iColBlkA, szBlock, A, B, C);
+\end{lstlisting}
+
 \item Comparer le temps pris par rapport au produit matrice--matrice "scalaire". Comment interprétez vous le résultat obtenu~?
 
+\textbf{Réponse :} Les tests ont montré qu'en augmentant progressivement la taille des blocs lors de la multiplication matricielle, on améliore significativement les performances par rapport à la méthode scalaire, grâce à une meilleure exploitation du cache mémoire. En effet, des tailles de blocs faibles entraînent des accès discontinus aux données, alors qu'une taille de 64 optimise la réutilisation des informations en cache, réduisant ainsi le temps d'exécution. Au-delà de cette valeur, les gains se stabilisent, indiquant que la taille de bloc optimale pour cette processeur se situe autour de 64.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\textwidth]{sizeBlock.pdf}
+	\caption{Performance vs Block Size (Matrix Size = 2048)}
+\end{figure}
+
 \item \textbf{\color{blue}Parallélisation du produit matrice--matrice par bloc }: \`A l'aide d'OpenMP, parallélisez le produit matrice--matrice par bloc puis mesurez l'accélération parallèle en fonction du nombre de threads. Comparez avec la version scalaire parallélisée. Comment expliquez vous ce résultat ?
+
+
+Pour la prochaine étape de parallélisation, nous allons utiliser le code suivant :
+\begin{lstlisting}[caption={Parallélisation avec OpenMP}, label={lst:parallel}]
+#pragma omp parallel
+{
+  #pragma omp for collapse(2) schedule(dynamic)
+  for (int iRowBlkA = 0; iRowBlkA < A.nbRows; iRowBlkA += szBlock)
+    for (int iColBlkB = 0; iColBlkB < B.nbCols; iColBlkB += szBlock)
+      for (int iColBlkA = 0; iColBlkA < A.nbCols; iColBlkA += szBlock)
+        prodSubBlocks(iRowBlkA, iColBlkB, iColBlkA, szBlock, A, B, C);
+}
+\end{lstlisting}
+
+Ce code utilise la directive \texttt{\#pragma omp parallel} pour créer une région parallèle, et la directive \texttt{\#pragma omp for collapse(2) schedule(dynamic)} pour paralléliser les deux premières boucles imbriquées. Cette approche permet de combiner les itérations des deux boucles afin de répartir plus efficacement la charge de travail entre les threads. En assignant à chaque thread un sous-bloc indépendant de la matrice, on optimise l'utilisation du cache en évitant de charger plusieurs fois les mêmes données dans différents caches. Ainsi, chaque processeur gère des portions spécifiques de la mémoire, ce qui améliore globalement la performance du calcul en réduisant les accès redondants en mémoire.
+
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\textwidth]{SpeedUp.pdf}
+	\caption{Speedup of matrix multiplication using OpenMP with varying thread counts.}
+	\label{fig:speedup}
+\end{figure}
+
 \item \textbf{\color{blue}{Comparaison avec blas}}: Comparez vos résultat avec l'exécutable \texttt{produit\_matmat\_blas.exe} qui utilise un produit matrice-matrice 
                                                      optimisé. Quel rapport de temps obtenez vous ? Quelle version est la meilleure selon vous ?
+
+\textbf{Réponse: }
+
+Notre multiplication par blocs optimisée a atteint une performance maximale d'environ 20000 MFLOPS pour une matrice de taille 2048, tandis que l'implémentation BLAS réalise le même calcul en obtenant environ 219430 MFLOPS. Cela correspond à un gain d’environ 11 fois en faveur de BLAS, ce qui démontre que, malgré les améliorations significatives apportées par l’algorithme par blocs (notamment grâce à une meilleure exploitation du cache), l'optimisation poussée et les techniques de parallélisme, vectorisation et gestion mémoire de BLAS en font la version la plus performante pour la multiplication matricielle.
 \end{enumerate}
 
 \section{Parallélisation MPI}

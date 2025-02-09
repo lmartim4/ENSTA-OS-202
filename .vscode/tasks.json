@@ -1,0 +1,28 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build",
+            "type": "shell",
+            "command": "make all -DEBUG", // Or "make all"
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": "$gcc" // Adjust if needed
+        },
+        {
+            "label": "build_debug",
+            "type": "shell",
+            "command": "make debug -DEBUG",
+            "group": "build",
+            "problemMatcher": "$gcc"
+        },
+        {
+            "label": "clean",
+            "type": "shell",
+            "command": "make clean",
+            "group": "clean"
+        }
+    ]
+}
