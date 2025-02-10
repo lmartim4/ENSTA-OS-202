@@ -26,7 +26,15 @@ Pour l'affichage de cette suite, on calcule une image de $W\times H$ pixels tell
 - Si la suite diverge, on affiche le pixel avec une couleur correspondant à la rapidité de divergence.
 
 1. À partir du code séquentiel `mandelbrot.py`, faire une partition équitable par bloc suivant les lignes de l'image pour distribuer le calcul sur `nbp` processus  puis rassembler l'image sur le processus zéro pour la sauvegarder. Calculer le temps d'exécution pour différents nombre de tâches et calculer le speedup. Comment interpréter les résultats obtenus ?
+
+`Réponse:` La parallélisation par répartition des lignes permet de distribuer efficacement le calcul de l'ensemble de Mandelbrot.
+
+![](Madelbrot_parallel.png)
+
 2. Réfléchissez à une meilleur répartition statique des lignes au vu de l'ensemble obtenu sur notre exemple et mettez la en œuvre. Calculer le temps d'exécution pour différents nombre de tâches et calculer le speedup et comparez avec l'ancienne répartition. Quel problème pourrait se poser avec une telle stratégie ?
+
+`Réponse: ` Je n'ai pas compris la question
+
 3. Mettre en œuvre une stratégie maître-esclave pour distribuer les différentes lignes de l'image à calculer. Calculer le speedup avec cette approche et comparez  avec les solutions différentes. Qu'en concluez-vous ?
 
 ## 2. Produit matrice-vecteur
