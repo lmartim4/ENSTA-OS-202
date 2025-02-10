@@ -7,6 +7,7 @@
 # include <iostream>
 # include <iomanip>
 # include <mpi.h>
+# include <omp.h>
 
 // Attention , ne marche qu'en C++ 11 ou supérieur :
 double approximate_pi( unsigned long nbSamples ) 
@@ -29,6 +30,42 @@ double approximate_pi( unsigned long nbSamples )
     double ratio = double(nbDarts)/double(nbSamples);
     return 4*ratio;
 }
+
+#define OPENMP
+
+#ifdef OPENMP
+int main(int argc, char* argv[]) {
+    // Par défaut, on utilise 100 millions de tirages, modifiable en ligne de commande.
+    unsigned long nbSamples = 100000000;
+    if (argc > 1) {
+        nbSamples = std::stoul(argv[1]);
+    }
+
+    // On peut aussi modifier le nombre de threads via la ligne de commande.
+    // Si le second argument est fourni, on force le nombre de threads.
+    if (argc > 2) {
+        int nThreads = std::stoi(argv[2]);
+        omp_set_num_threads(nThreads);
+    }
+
+    int usedThreads = omp_get_max_threads();
+    std::cout << "Utilisation de " << usedThreads << " threads." << std::endl;
+    std::cout << "Nombre d'échantillons : " << nbSamples << std::endl;
+
+    // Mesure du temps d'exécution
+    auto start = std::chrono::high_resolution_clock::now();
+    double pi = approximate_pi(nbSamples);
+    auto end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> elapsed = end - start;
+
+    std::cout << std::setprecision(15);
+    std::cout << "Valeur approchée de pi : " << pi << std::endl;
+    std::cout << "Temps d'exécution   : " << elapsed.count() << " s" << std::endl;
+
+    return EXIT_SUCCESS;
+}
+
+#else
 
 int main( int nargs, char* argv[] )
 {
@@ -70,3 +107,4 @@ int main( int nargs, char* argv[] )
 	return EXIT_SUCCESS;
 }
 
+#endif
