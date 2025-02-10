@@ -1,0 +1,2 @@
+Processus 5 : 9816650 points dans le disque sur 12500000 lancers.
+Temps d'execution (s) = 3.39506

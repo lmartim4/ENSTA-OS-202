@@ -1,5 +1,6 @@
 {
     "files.associations": {
+<<<<<<< HEAD
         "chrono": "cpp",
         "cassert": "cpp",
         "cmath": "cpp",
@@ -44,4 +45,8 @@
             "env": {}
         }
     ]
+=======
+        "iomanip": "cpp"
+    }
+>>>>>>> b3031483add5e7a18668ca8db3cb6d2eabc282fa
 }
