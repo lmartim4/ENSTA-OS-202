@@ -1,10 +1,10 @@
 # Fdb version 4
-["pdflatex"] 1739188004.55825 "/home/lmartim4/Bureau/ENSTA-OS-202/tp1/Sujet.tex" "Sujet.pdf" "Sujet" 1739188006.33274 0
+["pdflatex"] 1739189934.57988 "/home/lmartim4/Bureau/ENSTA-OS-202/tp1/Sujet.tex" "Sujet.pdf" "Sujet" 1739189936.46032 0
   "/etc/texmf/web2c/texmf.cnf" 1739120144.08754 475 c0e671620eb5563b2130f56340a5fde8 ""
   "/home/lmartim4/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/tcrm0800.600pk" 1739186913.1592 9268 5451cb2c6b717effdcf566b5727e8491 ""
   "/home/lmartim4/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/tcrm1095.600pk" 1739120236.1664 12644 ae636f0145df3a8bfbec5e582b7af2c4 ""
   "/home/lmartim4/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/tcrm1728.600pk" 1739120236.48239 20600 ad061993bf5287094402c2160bcb16e4 ""
-  "/home/lmartim4/Bureau/ENSTA-OS-202/tp1/Sujet.tex" 1739188004.35276 23921 226d5b08b7558f1ffa1fbb83b12ef744 ""
+  "/home/lmartim4/Bureau/ENSTA-OS-202/tp1/Sujet.tex" 1739189930.61437 24962 485d329a77b549ca3640802b80dd4f87 ""
   "/usr/share/texlive/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/jknappen/ec/tcrm0800.tfm" 1136768653 1536 05df9db6aeccc4eea94fec15c9024f79 ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/jknappen/ec/tcrm1095.tfm" 1136768653 1536 02c06700a42be0f5a28664c7273f82e7 ""
@@ -284,12 +284,13 @@
   "/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map" 1739120150.43246 165012 f177baa1c39a3ebd62c3096a43521a0d ""
   "/var/lib/texmf/web2c/pdftex/pdflatex.fmt" 1739120188 6830972 97643e97fb5769e5068534aacec72612 ""
   "SpeedUp.pdf" 1739185845.20911 60284 4ee5902b5d367459792cba884bfe6605 ""
-  "Sujet.aux" 1739188006.23375 2588 34e2165418d9b52fbb67b29c8f0d3208 "pdflatex"
-  "Sujet.out" 1739188006.23475 1078 547bf040e5676aff025f334c1ac98e17 "pdflatex"
-  "Sujet.tex" 1739188004.35276 23921 226d5b08b7558f1ffa1fbb83b12ef744 ""
-  "Sujet.toc" 1739188006.23475 497 c25e6713bcc4e6ad24ca1298abe58c5e "pdflatex"
+  "Sujet.aux" 1739189936.35523 2882 bbf31e57470edc3aa95de4ed928e25cd "pdflatex"
+  "Sujet.out" 1739189936.35523 1078 547bf040e5676aff025f334c1ac98e17 "pdflatex"
+  "Sujet.tex" 1739189930.61437 24962 485d329a77b549ca3640802b80dd4f87 ""
+  "Sujet.toc" 1739189936.35623 497 45ccf05514d183ad4df750925455f971 "pdflatex"
   "parallel1.pdf" 1739185845.21211 59368 52fbdd9d283ee26f620b96355c9a5e2f ""
   "sizeBlock.pdf" 1739185845.21311 46413 905f071bf87bd0fcc21ee165c2de3ba1 ""
+  "sources/calcul_pi/PI_in_mpi4py.png" 1739189737.25648 56445 493162d6934625b8c5c692f2bca720c4 ""
   "sources/calcul_pi/pi_MPI.png" 1739185891.03192 46442 62a14332039e893e6dac2b2e879d4807 ""
   "sources/calcul_pi/plot.png" 1739187927.68332 57449 af60463a2e005cd2cec5d74f9fd59ba6 ""
   (generated)

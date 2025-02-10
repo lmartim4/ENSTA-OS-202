@@ -514,6 +514,14 @@ INPUT ./sources/calcul_pi/pi_MPI.png
 INPUT ./sources/calcul_pi/pi_MPI.png
 INPUT ./sources/calcul_pi/pi_MPI.png
 INPUT ./sources/calcul_pi/pi_MPI.png
+INPUT /usr/share/texlive/texmf-dist/tex/latex/listings/lstlang1.sty
+INPUT /usr/share/texlive/texmf-dist/tex/latex/listings/lstlang1.sty
+INPUT /usr/share/texlive/texmf-dist/tex/latex/listings/lstlang1.sty
+INPUT ./sources/calcul_pi/PI_in_mpi4py.png
+INPUT ./sources/calcul_pi/PI_in_mpi4py.png
+INPUT ./sources/calcul_pi/PI_in_mpi4py.png
+INPUT ./sources/calcul_pi/PI_in_mpi4py.png
+INPUT ./sources/calcul_pi/PI_in_mpi4py.png
 INPUT Sujet.aux
 INPUT ./Sujet.out
 INPUT ./Sujet.out
