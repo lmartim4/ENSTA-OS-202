@@ -56,4 +56,4 @@
   - Des protections contre les vulnérabilités courantes liées à l'exécution spéculative (par exemple, Spectre v1, Spectre v2) sont en place, garantissant un environnement sécurisé pour l'exécution de code parallèle.
 
 # Reponses 
-👉 **Toutes les réponses détaillées sont disponibles dans le PDF.**  
+👉 **Toutes les réponses détaillées sont disponibles dans le [PDF Sujet](https://github.com/lmartim4/ENSTA-OS-202/blob/main/tp1/Sujet.pdf)**
