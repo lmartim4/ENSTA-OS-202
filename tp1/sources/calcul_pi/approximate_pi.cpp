@@ -12,17 +12,14 @@
 double approximate_pi(unsigned long nbSamples) {
     unsigned long nbDarts = 0;
 
-    // Create a parallel region
     #pragma omp parallel
     {
-        // Each thread gets its own random generator instance to avoid collisions.
         unsigned int seed = static_cast<unsigned int>(
             std::chrono::high_resolution_clock::now().time_since_epoch().count() + omp_get_thread_num()
         );
         std::default_random_engine generator(seed);
         std::uniform_real_distribution<double> distribution(-1.0, 1.0);
 
-        // Distribute the loop iterations among threads, with a reduction on nbDarts.
         #pragma omp for reduction(+:nbDarts)
         for (unsigned long sample = 0; sample < nbSamples; ++sample) {
             double x = distribution(generator);

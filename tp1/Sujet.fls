@@ -502,9 +502,22 @@ INPUT ./SpeedUp.pdf
 INPUT ./SpeedUp.pdf
 INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/cm/cmbx12.tfm
 INPUT /usr/share/texlive/texmf-dist/fonts/tfm/jknappen/ec/tcrm1095.tfm
+INPUT /usr/share/texlive/texmf-dist/fonts/tfm/jknappen/ec/tcrm0800.tfm
+INPUT ./sources/calcul_pi/plot.png
+INPUT ./sources/calcul_pi/plot.png
+INPUT ./sources/calcul_pi/plot.png
+INPUT ./sources/calcul_pi/plot.png
+INPUT ./sources/calcul_pi/plot.png
+INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/cm/cmtt8.tfm
+INPUT ./sources/calcul_pi/pi_MPI.png
+INPUT ./sources/calcul_pi/pi_MPI.png
+INPUT ./sources/calcul_pi/pi_MPI.png
+INPUT ./sources/calcul_pi/pi_MPI.png
+INPUT ./sources/calcul_pi/pi_MPI.png
 INPUT Sujet.aux
 INPUT ./Sujet.out
 INPUT ./Sujet.out
+INPUT /home/lmartim4/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/tcrm0800.600pk
 INPUT /home/lmartim4/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/tcrm1095.600pk
 INPUT /home/lmartim4/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/tcrm1728.600pk
 INPUT /usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb
@@ -521,3 +534,4 @@ INPUT /usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb
 INPUT /usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb
 INPUT /usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb
 INPUT /usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb
+INPUT /usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt8.pfb

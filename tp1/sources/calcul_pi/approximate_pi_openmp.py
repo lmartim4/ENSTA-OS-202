@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import matplotlib.pyplot as plt
+import numpy as np
 
 def main():
     # Measured execution times (in seconds) for 1e9 samples
@@ -19,21 +20,30 @@ def main():
     speedups = [baseline_time / execution_times[t] for t in threads]
     efficiencies = [(baseline_time / execution_times[t]) / t * 100 for t in threads]
 
-    fig, (ax_speedup, ax_efficiency) = plt.subplots(2, 1, figsize=(8, 10), sharex=True)
+    fig, (ax_speedup, ax_efficiency) = plt.subplots(1, 2, figsize=(12, 5))
 
+    # Speedup plot
     ax_speedup.plot(threads, speedups, marker='o', linestyle='-', color='b', label='Measured Speedup')
     ax_speedup.plot(threads, threads, marker='o', linestyle='--', color='r', label='Ideal Speedup')
     ax_speedup.set_title('Speedup vs. Number of Threads')
+    ax_speedup.set_xlabel('Number of Threads')
     ax_speedup.set_ylabel('Speedup (T(1)/T(n))')
     ax_speedup.legend()
     ax_speedup.grid(True)
+    ax_speedup.set_xscale('log', base=2)
+    ax_speedup.set_xticks(threads)
+    ax_speedup.set_xticklabels(threads)
 
+    # Efficiency plot
     ax_efficiency.plot(threads, efficiencies, marker='s', linestyle='-', color='g', label='Efficiency')
     ax_efficiency.set_title('Efficiency vs. Number of Threads')
     ax_efficiency.set_xlabel('Number of Threads')
     ax_efficiency.set_ylabel('Efficiency (%)')
     ax_efficiency.legend()
     ax_efficiency.grid(True)
+    ax_efficiency.set_xscale('log', base=2)
+    ax_efficiency.set_xticks(threads)
+    ax_efficiency.set_xticklabels(threads)
 
     plt.tight_layout()
     plt.savefig('plot.png')
