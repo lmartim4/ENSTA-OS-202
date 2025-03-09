@@ -1,0 +1,4 @@
+Total execution time: 25587975 ms, OpenMP threads: 12
+Total execution time: 26778464 ms, OpenMP threads: 12
+Total execution time: 25339 ms, OpenMP threads: 12
+Total execution time: 25456845 ms, OpenMP threads: 12

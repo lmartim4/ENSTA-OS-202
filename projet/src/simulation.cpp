@@ -4,7 +4,12 @@
 #include <iostream>
 #include <thread>
 #include <chrono>
-
+#include <fstream>
+#include <iomanip>
+#include <sstream>
+#include <ctime>
+#include <omp.h>
+#include <filesystem>
 #include "model.hpp"
 #include "display.hpp"
 
@@ -14,9 +19,9 @@ using namespace std::chrono_literals;
 struct ParamsType
 {
     double length{1.};
-    unsigned discretization{500u};
+    unsigned discretization{20u};
     std::array<double,2> wind{0.,0.};
-    Model::LexicoIndices start{10u,10u};
+    Model::Coordinates start{10u,10u};
 };
 
 void analyze_arg( int nargs, char* args[], ParamsType& params )
@@ -87,7 +92,7 @@ void analyze_arg( int nargs, char* args[], ParamsType& params )
     if (pos < key.size())
     {
         auto subkey = std::string(key, pos+7);
-        params.wind[0] = std::stoul(subkey);
+        params.wind[0] = std::stod(subkey);
         auto pos = subkey.find(",");
         if (pos == subkey.size())
         {
@@ -144,14 +149,14 @@ ParamsType parse_arguments( int nargs, char* args[] )
     if ( (std::string(args[0]) == "--help"s) || (std::string(args[0]) == "-h") )
     {
         std::cout << 
-R"RAW(Usage : simulation [option(s)]
-  Lance la simulation d'incendie en prenant en compte les [option(s)].
-  Les options sont :
-    -l, --longueur=LONGUEUR     Définit la taille LONGUEUR (réel en km) du carré représentant la carte de la végétation.
-    -n, --number_of_cases=N     Nombre n de cases par direction pour la discrétisation
-    -w, --wind=VX,VY            Définit le vecteur vitesse du vent (pas de vent par défaut).
-    -s, --start=COL,ROW         Définit les indices I,J de la case où commence l'incendie (milieu de la carte par défaut)
-)RAW";
+        R"RAW(Usage : simulation [option(s)]
+        Lance la simulation d'incendie en prenant en compte les [option(s)].
+        Les options sont :
+            -l, --longueur=LONGUEUR     Définit la taille LONGUEUR (réel en km) du carré représentant la carte de la végétation.
+            -n, --number_of_cases=N     Nombre n de cases par direction pour la discrétisation
+            -w, --wind=VX,VY            Définit le vecteur vitesse du vent (pas de vent par défaut).
+            -s, --start=COL,ROW         Définit les indices I,J de la case où commence l'incendie (milieu de la carte par défaut)
+        )RAW";
         exit(EXIT_SUCCESS);
     }
     ParamsType params;
@@ -192,28 +197,92 @@ void display_params(ParamsType const& params)
               << "\tPosition initiale du foyer (col, ligne) : " << params.start.column << ", " << params.start.row << std::endl;
 }
 
+std::string generate_timestamp_filename()
+{
+    auto now = std::chrono::system_clock::now();
+    std::time_t now_time = std::chrono::system_clock::to_time_t(now);
+    std::tm local_tm = *std::localtime(&now_time);
+
+    std::ostringstream oss;
+    oss << std::put_time(&local_tm, "%H-%M-%S-%d-%m-%Y") << ".csv";
+    return oss.str();
+}
+
 int main( int nargs, char* args[] )
 {
     auto params = parse_arguments(nargs-1, &args[1]);
     display_params(params);
     if (!check_params(params)) return EXIT_FAILURE;
 
-    auto displayer = Displayer::init_instance( params.discretization, params.discretization );
-    auto simu = Model( params.length, params.discretization, params.wind, params.start);
+    auto displayer = Displayer::init_instance(params.discretization, params.discretization);
+    auto simu = Model(params.length, params.discretization, params.wind, params.start);
     SDL_Event event;
 
-    while (simu.update())
+
+    std::filesystem::create_directories("logs");
+
+    std::ofstream csv_file("logs/" + generate_timestamp_filename());
+    if (!csv_file.is_open())
     {
+        std::cerr << "Unable to open CSV file" << std::endl;
+        return EXIT_FAILURE;
+    }
+
+
+    int num_threads = omp_get_max_threads();
+    csv_file << "OpenMP threads: " << num_threads << "\n";
+    csv_file << "step,update_time,display_time,total_time\n";
+
+    auto start_time = std::chrono::high_resolution_clock::now();
+    int step = 0;
+    while (true)
+    {
+        auto iter_start = std::chrono::high_resolution_clock::now();
+
+        auto update_start = std::chrono::high_resolution_clock::now();
+        bool updating = simu.update();
+        auto update_end = std::chrono::high_resolution_clock::now();
+
+        if (!updating)
+            break;  // Exit if simulation update returns false.
+
         while (SDL_PollEvent(&event))
             if (event.type == SDL_QUIT)
                 return EXIT_SUCCESS;
         
-        if ((simu.time_step() & 31) == 0) 
-            std::cout << "Time step " << simu.time_step() << "\n===============" << std::endl;
-    
-        displayer->update(simu.vegetal_map(), simu.fire_map());
+
+        auto display_start = std::chrono::high_resolution_clock::now();
+        displayer->update(simu.vegetal_map(), simu.get_fire_map());
+        auto display_end = std::chrono::high_resolution_clock::now();
+
+        auto iter_end = std::chrono::high_resolution_clock::now();
+
+        auto update_time = std::chrono::duration_cast<std::chrono::microseconds>(update_end - update_start).count();
+        auto display_time = std::chrono::duration_cast<std::chrono::microseconds>(display_end - display_start).count();
+        auto total_time = std::chrono::duration_cast<std::chrono::microseconds>(iter_end - iter_start).count();
         
-        std::this_thread::sleep_for(1ms);
+        if ((simu.get_time_step() & 31) == 0)
+            std::cout << "Time step " << simu.get_time_step() << "\n===============" << std::endl;
+
+        csv_file << step << "," << update_time << "," << display_time << "," << total_time << "\n";
+        step++;
+    }
+    csv_file.close();
+
+    auto end_time = std::chrono::high_resolution_clock::now();
+    auto elapsed = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
+
+    // Log total execution time and OpenMP thread count to logs.txt.
+    std::ofstream log_file("logs.txt", std::ios::app);
+    if (log_file.is_open())
+    {
+        log_file << "Total execution time: " << elapsed.count() << " ms, "
+                 << "OpenMP threads: " << num_threads << std::endl;
+        log_file.close();
+    }
+    else
+    {
+        std::cerr << "Unable to open log file" << std::endl;
     }
         
     return EXIT_SUCCESS;

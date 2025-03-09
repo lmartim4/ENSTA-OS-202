@@ -26,7 +26,7 @@ private:
     static std::shared_ptr<Displayer> unique_instance;
 
 
-    SDL_Renderer *m_pt_renderer{nullptr};
-    SDL_Surface  *m_pt_surface{nullptr};
-    SDL_Window   *m_pt_window {nullptr};
+    SDL_Renderer *pt_renderer{nullptr};
+    SDL_Surface  *pt_surface{nullptr};
+    SDL_Window   *pt_window {nullptr};
 };

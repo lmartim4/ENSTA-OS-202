@@ -17,6 +17,10 @@ default:	help
 
 all: $(ALL)
 
+debug: CXXFLAGS += -DDEBUG -g
+debug: CCFLAGS += -DDEBUG -g
+debug: simulation.exe
+
 clean:
 	@rm -fr *.o *.exe *~
 
