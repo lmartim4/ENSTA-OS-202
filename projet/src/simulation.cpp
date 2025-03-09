@@ -233,8 +233,6 @@ int main( int nargs, char* args[] )
     csv_file << "OpenMP threads: " << num_threads << "\n";
     csv_file << "step,update_time,display_time,total_time\n";
 
-    auto start_time = std::chrono::high_resolution_clock::now();
-    int step = 0;
     while (true)
     {
         auto iter_start = std::chrono::high_resolution_clock::now();
@@ -250,7 +248,6 @@ int main( int nargs, char* args[] )
             if (event.type == SDL_QUIT)
                 return EXIT_SUCCESS;
         
-
         auto display_start = std::chrono::high_resolution_clock::now();
         displayer->update(simu.vegetal_map(), simu.get_fire_map());
         auto display_end = std::chrono::high_resolution_clock::now();
@@ -264,26 +261,10 @@ int main( int nargs, char* args[] )
         if ((simu.get_time_step() & 31) == 0)
             std::cout << "Time step " << simu.get_time_step() << "\n===============" << std::endl;
 
-        csv_file << step << "," << update_time << "," << display_time << "," << total_time << "\n";
-        step++;
-    }
-    csv_file.close();
+        csv_file << simu.get_time_step()-1 << "," << update_time << "," << display_time << "," << total_time << "\n";
 
-    auto end_time = std::chrono::high_resolution_clock::now();
-    auto elapsed = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
-
-    // Log total execution time and OpenMP thread count to logs.txt.
-    std::ofstream log_file("logs.txt", std::ios::app);
-    if (log_file.is_open())
-    {
-        log_file << "Total execution time: " << elapsed.count() << " ms, "
-                 << "OpenMP threads: " << num_threads << std::endl;
-        log_file.close();
     }
-    else
-    {
-        std::cerr << "Unable to open log file" << std::endl;
-    }
-        
+    
+    csv_file.close();    
     return EXIT_SUCCESS;
 }

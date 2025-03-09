@@ -82,7 +82,6 @@ bool Model::update()
         // Et de la puissance du foyer
         double        power = log_factor(f.second);
 
-
         // On va tester les cases voisines pour contamination par le feu :
         if (coord.row < geometry-1)
         {
