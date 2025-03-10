@@ -31,7 +31,7 @@ public:
 private:
     std::size_t   get_index_from_coord( Coordinates t_lexico_indices  ) const;
     Coordinates get_coord_from_index        ( std::size_t t_global_index ) const;
-
+    
     double length;                    // Taille du carré représentant le terrain (en km)
     double distance;                  // Taille d'une case du terrain modélisé
     std::size_t time_step = 0;        // Dernier numéro du pas de temps calculé

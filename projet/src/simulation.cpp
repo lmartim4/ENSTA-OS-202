@@ -228,10 +228,16 @@ int main( int nargs, char* args[] )
         return EXIT_FAILURE;
     }
 
+    csv_file << "Taille du terrain : " << params.length << std::endl 
+    << "Nombre de cellules par direction : " << params.discretization << std::endl 
+    << "Vecteur vitesse : [" << params.wind[0] << ", " << params.wind[1] << "]" << std::endl
+    << "Position initiale du foyer (col, ligne) : " << params.start.column << ", " << params.start.row << std::endl;
 
+    
     int num_threads = omp_get_max_threads();
     csv_file << "OpenMP threads: " << num_threads << "\n";
     csv_file << "step,update_time,display_time,total_time\n";
+
 
     while (true)
     {
