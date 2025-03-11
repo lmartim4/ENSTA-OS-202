@@ -110,7 +110,7 @@ bool Model::update()
         auto& local_updates = all_local_updates[id_x];
         local_updates.reserve(indices.size() * 4);
         
-        #pragma omp for //schedule(dynamic, 32)
+        #pragma omp for
         for (size_t i = 0; i < indices.size(); i++)
         {
             std::size_t current_index = indices[i];
