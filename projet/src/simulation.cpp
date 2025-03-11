@@ -214,7 +214,7 @@ int main( int nargs, char* args[] )
     display_params(params);
     if (!check_params(params)) return EXIT_FAILURE;
 
-    auto displayer = Displayer::init_instance(params.discretization, params.discretization);
+    //auto displayer = Displayer::init_instance(params.discretization, params.discretization);
     auto simu = Model(params.length, params.discretization, params.wind, params.start);
     SDL_Event event;
 
@@ -254,20 +254,20 @@ int main( int nargs, char* args[] )
             if (event.type == SDL_QUIT)
                 return EXIT_SUCCESS;
         
-        auto display_start = std::chrono::high_resolution_clock::now();
-        displayer->update(simu.vegetal_map(), simu.get_fire_map());
-        auto display_end = std::chrono::high_resolution_clock::now();
+        // auto display_start = std::chrono::high_resolution_clock::now();
+        // displayer->update(simu.vegetal_map(), simu.get_fire_map());
+        // auto display_end = std::chrono::high_resolution_clock::now();
 
         auto iter_end = std::chrono::high_resolution_clock::now();
 
         auto update_time = std::chrono::duration_cast<std::chrono::microseconds>(update_end - update_start).count();
-        auto display_time = std::chrono::duration_cast<std::chrono::microseconds>(display_end - display_start).count();
+        //auto display_time = std::chrono::duration_cast<std::chrono::microseconds>(display_end - display_start).count();
         auto total_time = std::chrono::duration_cast<std::chrono::microseconds>(iter_end - iter_start).count();
         
         if ((simu.get_time_step() & 31) == 0)
             std::cout << "Time step " << simu.get_time_step() << "\n===============" << std::endl;
 
-        csv_file << simu.get_time_step()-1 << "," << update_time << "," << display_time << "," << total_time << "\n";
+        csv_file << simu.get_time_step()-1 << "," << update_time << "," << /*display_time*/ 0 << "," << total_time << "\n";
 
     }
     

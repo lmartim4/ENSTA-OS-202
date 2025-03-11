@@ -4,7 +4,7 @@ rm -rf logs/*
 
 make clean && make simulation.exe 
 
-for threads in {1..12}; do
+for threads in {1..4}; do
     export OMP_NUM_THREADS=$threads
     echo "Running simulation with OMP_NUM_THREADS=$OMP_NUM_THREADS"
 
