@@ -20,10 +20,10 @@ if [ ! -f "simulation.exe" ]; then
     exit 1
 fi
 
-for threads in 1 2 3 4 5 6 7 8 9 10 11 12; do
+for threads in 1 2 6 12; do
     echo "Executando com OMP_NUM_THREADS=$threads"
     export OMP_NUM_THREADS=$threads
-    ./simulation.exe -n 300
+    ./simulation.exe -n 1000 -s 500,500
     echo "----------------------------------------"
 done
 
@@ -31,5 +31,6 @@ cd ..
 
 echo "Gerando gráfico de Speedup..."
 python speedup_plot.py
+python csv_plot.py
 
 echo "Processo concluído!"

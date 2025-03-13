@@ -111,8 +111,8 @@ plt.show()
 total_speedup = {}
 
 # Compute the 25th and 75th percentiles of the step values
-proportional_start = int(single_thread_df["step"].quantile(0.25))
-proportional_end = int(single_thread_df["step"].quantile(0.75))
+proportional_start = int(single_thread_df["step"].quantile(0.4))
+proportional_end = int(single_thread_df["step"].quantile(0.6))
 
 # Filter the DataFrame using these dynamic values
 single_thread_middle = single_thread_df[

@@ -2,6 +2,8 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import sys
 import re
+import os
+import glob
 
 def extract_metadata_and_data(filename):
     metadata = {}
@@ -61,19 +63,17 @@ def plot_csv(filename):
     try:
         metadata, df = extract_metadata_and_data(filename)
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"Error processing {filename}: {e}")
         return
     
-    # Extract relevant metadata (use .get(...) as a fallback to "Unknown" in case missing)
+    # Extract relevant metadata (using .get(...) with fallback "Unknown")
     omp_threads = metadata.get('OpenMP threads', 'Unknown')
-    terrain_size = metadata.get('terrain_size', 'Unknown')
     cells = metadata.get('cells', 'Unknown')
     fire_col = metadata.get('fire_col', 'Unknown')
     fire_row = metadata.get('fire_row', 'Unknown')
     velocity = metadata.get('velocity', ('Unknown', 'Unknown'))
     
-    # Create a more descriptive title using the extracted metadata
-    # Adjust or reduce the details as you prefer
+    # Create a descriptive title using the extracted metadata
     title_str = (
         f"- n:{cells} "
         f"- s({fire_col},{fire_row}) "
@@ -96,11 +96,24 @@ def plot_csv(filename):
     # Save the figure with the same filename but .png extension
     output_filename = filename.replace('.csv', '.png')
     plt.savefig(output_filename)
+    plt.close()  # Close the figure to free up memory
     print(f"Plot saved as {output_filename}")
 
-# Example usage:
+def main():
+    # Specify the logs folder
+    logs_folder = 'logs'
+    
+    # Find all CSV files in the logs folder
+    csv_files = glob.glob(os.path.join(logs_folder, '*.csv'))
+    
+    if not csv_files:
+        print("No CSV files found in the logs folder.")
+        return
+    
+    # Process each CSV file
+    for csv_file in csv_files:
+        print(f"Processing {csv_file}...")
+        plot_csv(csv_file)
+
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print("Usage: python plot_csv.py <filename.csv>")
-    else:
-        plot_csv(sys.argv[1])
+    main()

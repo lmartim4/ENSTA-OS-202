@@ -1,5 +1,5 @@
 {
-    "cmake.sourceDirectory": "/home/lmartim4/ENSTA-OS-202/projet/src",
+    "cmake.sourceDirectory": "/home/lmartim4/ENSTA-OS-202/projet",
     "files.associations": {
         "array": "cpp",
         "atomic": "cpp",
@@ -74,6 +74,9 @@
         "unordered_set": "cpp",
         "future": "cpp",
         "mutex": "cpp",
-        "stdfloat": "cpp"
+        "stdfloat": "cpp",
+        "coroutine": "cpp",
+        "shared_mutex": "cpp",
+        "cfenv": "cpp"
     }
 }
