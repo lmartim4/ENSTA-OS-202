@@ -93,4 +93,7 @@ plt.xlabel("Step")
 plt.ylabel("Speedup")
 plt.title(f"Speedup vs. Step (based on {TIME_COLUMN})")
 plt.legend()
+
+
+plt.savefig("speedup.png")
 plt.show()

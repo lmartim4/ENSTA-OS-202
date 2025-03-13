@@ -1,5 +1,5 @@
 {
-    "cmake.sourceDirectory": "/home/lmartim4/Desktop/ENSTA-OS-202/projet/src",
+    "cmake.sourceDirectory": "/home/lmartim4/ENSTA-OS-202/projet/src",
     "files.associations": {
         "array": "cpp",
         "atomic": "cpp",
@@ -56,6 +56,24 @@
         "streambuf": "cpp",
         "thread": "cpp",
         "cinttypes": "cpp",
-        "typeinfo": "cpp"
+        "typeinfo": "cpp",
+        "charconv": "cpp",
+        "cstring": "cpp",
+        "map": "cpp",
+        "optional": "cpp",
+        "format": "cpp",
+        "span": "cpp",
+        "text_encoding": "cpp",
+        "variant": "cpp",
+        "any": "cpp",
+        "bitset": "cpp",
+        "condition_variable": "cpp",
+        "forward_list": "cpp",
+        "list": "cpp",
+        "set": "cpp",
+        "unordered_set": "cpp",
+        "future": "cpp",
+        "mutex": "cpp",
+        "stdfloat": "cpp"
     }
 }

@@ -12,6 +12,7 @@
 #include <filesystem>
 #include "model.hpp"
 #include "display.hpp"
+#include "profiler.hpp"
 
 using namespace std::string_literals;
 using namespace std::chrono_literals;
@@ -208,68 +209,49 @@ std::string generate_timestamp_filename()
     return oss.str();
 }
 
-int main( int nargs, char* args[] )
-{
+int main(int nargs, char* args[]) {
     auto params = parse_arguments(nargs-1, &args[1]);
     display_params(params);
-    if (!check_params(params)) return EXIT_FAILURE;
+    if (!check_params(params))
+        return EXIT_FAILURE;
 
     auto displayer = Displayer::init_instance(params.discretization, params.discretization);
     auto simu = Model(params.length, params.discretization, params.wind, params.start);
     SDL_Event event;
-
-
-    std::filesystem::create_directories("logs");
-
-    std::ofstream csv_file("logs/" + generate_timestamp_filename());
-    if (!csv_file.is_open())
-    {
-        std::cerr << "Unable to open CSV file" << std::endl;
-        return EXIT_FAILURE;
-    }
-
-    csv_file << "Taille du terrain : " << params.length << std::endl 
-        << "Nombre de cellules par direction : " << params.discretization << std::endl 
-        << "Vecteur vitesse : [" << params.wind[0] << ", " << params.wind[1] << "]" << std::endl
-        << "Position initiale du foyer (col, ligne) : " << params.start.column << ", " << params.start.row << std::endl;
-
     
+    Profiler profiler(generate_timestamp_filename(),
+        "Taille du terrain : " + std::to_string(params.length) + "\n" 
+        + "Nombre de cellules par direction : " + std::to_string(params.discretization) + "\n" 
+        + "Vecteur vitesse : [" + std::to_string(params.wind[0]) + ", " + std::to_string(params.wind[1]) + "]" + "\n"
+        + "Position initiale du foyer (col, ligne) : " + std::to_string(params.start.column) + ", " + std::to_string(params.start.row) + "\n");
+
     int num_threads = omp_get_max_threads();
-    
-    csv_file << "OpenMP threads: " << num_threads << "\n";
-    csv_file << "step,update_time,display_time,total_time\n";
+    std::cout << "OpenMP threads: " << num_threads << std::endl;
 
+    while (true) {
+        profiler.start("total");
 
-    while (true)
-    {
-        auto iter_start = std::chrono::high_resolution_clock::now();
-
-        auto update_start = std::chrono::high_resolution_clock::now();
+        profiler.start("update");
         bool updating = simu.update();
-        auto update_end = std::chrono::high_resolution_clock::now();
+        profiler.stop("update");
 
-        if (!updating)
-            break;  // Exit if simulation update returns false.
+        if (!updating) break;
 
         while (SDL_PollEvent(&event))
             if (event.type == SDL_QUIT)
                 return EXIT_SUCCESS;
-        
-        auto display_start = std::chrono::high_resolution_clock::now();
+
+        profiler.start("display");
         displayer->update(simu.vegetal_map(), simu.get_fire_map());
-        auto display_end = std::chrono::high_resolution_clock::now();
+        profiler.stop("display");
 
-        auto iter_end = std::chrono::high_resolution_clock::now();
+        profiler.stop("total");
+        
+        if ((simu.get_time_step() & 31) == 0) 
+            std::cout << "Time step " << simu.get_time_step() << "\n===============" << std::endl;
 
-        auto update_time = std::chrono::duration_cast<std::chrono::microseconds>(update_end - update_start).count();
-        auto display_time = std::chrono::duration_cast<std::chrono::microseconds>(display_end - display_start).count();
-        auto total_time = std::chrono::duration_cast<std::chrono::microseconds>(iter_end - iter_start).count();
-        
-        if ((simu.get_time_step() & 31) == 0) std::cout << "Time step " << simu.get_time_step() << "\n===============" << std::endl;
-        
-        csv_file << simu.get_time_step()-1 << "," << update_time << "," << display_time << "," << total_time << "\n";
+        profiler.log(simu.get_time_step() - 1);
     }
-    
-    csv_file.close();    
+
     return EXIT_SUCCESS;
 }
