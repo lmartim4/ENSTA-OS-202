@@ -106,7 +106,7 @@ bool Model::update()
         auto& local_updates = all_local_updates[thread_id];
         local_updates.reserve(front_iters.size() * 4);
         
-        #pragma omp for schedule(dynamic, 32)
+        #pragma omp for schedule(dynamic, 64)
         for (std::size_t i = 0; i < front_iters.size(); i++)
         {
             // Directly get the key and value from the iterator.
