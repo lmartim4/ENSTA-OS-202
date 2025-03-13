@@ -1,5 +1,7 @@
 # Testes parte 1
 
+
+
 Medir o tempo somente da evolução temporal "Benchmark?"
  - Medir isoladamente do tempo de affichage
 
