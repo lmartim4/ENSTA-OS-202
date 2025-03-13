@@ -244,8 +244,7 @@ int main(int nargs, char *args[])
 
         profiler.stop("total");
 
-        if ((simu.get_time_step() & 31) == 0)
-            std::cout << "Time step " << simu.get_time_step() << "\n===============" << std::endl;
+        //if ((simu.get_time_step() & 31) == 0) std::cout << "Time step " << simu.get_time_step() << "\n===============" << std::endl;
 
         profiler.log(simu.get_time_step() - 1);
     }
