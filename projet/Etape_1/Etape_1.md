@@ -81,3 +81,6 @@ int main(int nargs, char *args[])
 
 3. **Préservation du déterminisme** : Pour garantir que la simulation parallèle produise des résultats identiques à la version séquentielle, j'ai veillé à préserver l'ordre de traitement des cellules et utilisé des générateurs de nombres pseudo-aléatoires déterministes basés sur les indices et le pas de temps.
 
+## Accès au code
+
+Si vous souhaitez voir le code de la fonction `Model::update()` après la parallélisation de l'étape 1, il est disponible dans le fichier **`model_etape_1.cpp`** situé dans ce répertoire.
