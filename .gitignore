@@ -35,6 +35,5 @@ CMakeUserPresets.json
 
 # External projects
 *-prefix/
-*.csv
 *.exe
 tp_parallel/*
