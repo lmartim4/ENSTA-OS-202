@@ -16,7 +16,7 @@ C'est généralement dans cette partie que le temps de mise à jour consomme bea
 
 ## Illustrations pour N=700
 
-À partir de maintenant, j'utiliserai quelques images pour illustrer le processus. Elles concernent toutes N=700, mais les résultats sont très similaires pour tous les autres ensembles.
+À partir de maintenant, nous allons utiliser quelques images pour illustrer le processus. Elles concernent toutes N=700, mais les résultats sont très similaires pour tous les autres ensembles.
 
 ### Comparaison : Séquentiel vs Parallélisé (10 threads)
 
@@ -46,7 +46,5 @@ Si nous nous limitons à la région centrale, où la parallélisation a des effe
 Ici, il est possible d'analyser une tendance du speedup à atteindre des valeurs proches de 1,8, où la différence de gain pour plus de 4 threads est minime.
 
 ## Conclusion
-
-#TODO
 
 Ces résultats peuvent nous conduire à plusieurs analyses selon la loi d'Amdahl/Gustafson. La parallélisation montre un avantage clair dans les régions à forte intensité de mémoire, mais présente un compromis dans les autres régions. Le speedup maximal obtenu d'environ 1,8 avec 4 threads suggère une limite dans notre capacité à paralléliser davantage cette partie de l'algorithme sans repenser l'approche ou l'architecture mémoire.

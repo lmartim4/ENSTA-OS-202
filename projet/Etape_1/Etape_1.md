@@ -2,18 +2,18 @@
 
 ## Résumé des modifications apportées
 
-Dans cette première étape du projet de parallélisation de la simulation de feu de forêt, j'ai implémenté une version parallélisée de la fonction `Model::update()` en utilisant OpenMP. Voici les principales modifications apportées au code original :
+Dans cette première étape du projet de parallélisation de la simulation de feu de forêt, nous avons implémenté une version parallélisée de la fonction `Model::update()` en utilisant OpenMP. Voici les principales modifications apportées au code original :
 
 ### 1. Conception de la classe `Profiler`
 
-J'ai créé une classe `Profiler` pour mesurer précisément les performances de la simulation, avec les fonctionnalités suivantes :
+Nous avons créé une classe `Profiler` pour mesurer précisément les performances de la simulation, avec les fonctionnalités suivantes :
 - Enregistrement des temps d'exécution pour différentes sections du code (mise à jour, affichage, etc.)
 - Stockage des résultats dans un fichier CSV pour analyse ultérieure
 - Identification des bottlenecks dans la simulation
 
 ### 2. Parallélisation de l'avancement du temps
 
-Dans la fonction `Model::update()`, j'ai remplacé la boucle séquentielle par une approche parallèle en suivant ces étapes :
+Dans la fonction `Model::update()`, nous avons remplacé la boucle séquentielle par une approche parallèle en suivant ces étapes :
 - Collecte des clés du dictionnaire `fire_front` dans un vecteur d'itérateurs
 - Parallélisation du traitement avec `#pragma omp parallel`
 - Utilisation de `#pragma omp for schedule(dynamic, 64)` pour répartir la charge de travail entre les threads
@@ -21,7 +21,7 @@ Dans la fonction `Model::update()`, j'ai remplacé la boucle séquentielle par u
 
 ### 3. Structure des mises à jour locales
 
-J'ai implémenté une approche où chaque thread :
+Nous avons implémenté une approche où chaque thread :
 - Maintient son propre vecteur de mises à jour locales
 - Traite un sous-ensemble des cellules en feu
 - Accumule les modifications à apporter aux cartes
@@ -29,7 +29,7 @@ J'ai implémenté une approche où chaque thread :
 
 ### 4. Parallélisation de la mise à jour de la végétation
 
-J'ai également parallélisé la boucle de mise à jour de la végétation en utilisant une directive `#pragma omp parallel for` avec un ordonnancement dynamique.
+Nous avons également parallélisé la boucle de mise à jour de la végétation en utilisant une directive `#pragma omp parallel for` avec un ordonnancement dynamique.
 
 ## Instrumentation et mesure des performances
 
@@ -75,11 +75,11 @@ int main(int nargs, char *args[])
 
 ## Défis rencontrés et solutions
 
-1. **Gestion des conflits d'accès** : Pour éviter les conflits d'écriture entre threads, j'ai implémenté un système où chaque thread accumule ses modifications localement avant de les fusionner dans une phase séquentielle.
+1. **Gestion des conflits d'accès** : Pour éviter les conflits d'écriture entre threads, nous avons implémenté un système où chaque thread accumule ses modifications localement avant de les fusionner dans une phase séquentielle.
 
 2. **Équilibrage de charge** : L'utilisation d'un ordonnancement dynamique (`schedule(dynamic, 64)`) permet une meilleure répartition du travail entre les threads, chaque thread traitant un bloc de 64 éléments à la fois.
 
-3. **Préservation du déterminisme** : Pour garantir que la simulation parallèle produise des résultats identiques à la version séquentielle, j'ai veillé à préserver l'ordre de traitement des cellules et utilisé des générateurs de nombres pseudo-aléatoires déterministes basés sur les indices et le pas de temps.
+3. **Préservation du déterminisme** : Pour garantir que la simulation parallèle produise des résultats identiques à la version séquentielle, nous avons veillé à préserver l'ordre de traitement des cellules et utilisé des générateurs de nombres pseudo-aléatoires déterministes basés sur les indices et le pas de temps.
 
 ## Accès au code
 
