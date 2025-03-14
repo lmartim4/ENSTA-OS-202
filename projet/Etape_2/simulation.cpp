@@ -145,7 +145,7 @@ ParamsType parse_arguments( int nargs, char* args[] )
     if (nargs == 0) return {};
     if ( (std::string(args[0]) == "--help"s) || (std::string(args[0]) == "-h") )
     {
-        std::cout << 
+        std::cout <<
 R"RAW(Usage : simulation [option(s)]
   Lance la simulation d'incendie en prenant en compte les [option(s)].
   Les options sont :
@@ -194,164 +194,90 @@ void display_params(ParamsType const& params)
               << "\tPosition initiale du foyer (col, ligne) : " << params.start.column << ", " << params.start.row << std::endl;
 }
 
-// Structure pour envoyer des données d'affichage entre les processus
-struct DisplayData {
-    std::vector<unsigned> vegetal_map;
-    std::vector<unsigned> fire_map;
-    bool continue_simulation;
-};
-
-int main(int nargs, char* args[])
+int main(int argc, char* argv[])
 {
-    // Initialisation de MPI
-    MPI_Init(&nargs, &args);
-    
-    int rank, size;
+    MPI_Init(&argc, &argv);
+
+    int rank = 0, size = 1;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &size);
-    
-    // Vérifier qu'il y a au moins 2 processus
-    if (size < 2) {
-        if (rank == 0) {
-            std::cerr << "Cette implémentation nécessite au moins 2 processus MPI" << std::endl;
-        }
-        MPI_Finalize();
+
+    auto params = parse_arguments(argc - 1, &argv[1]);
+    if (!check_params(params))
+    {
+        MPI_Abort(MPI_COMM_WORLD, EXIT_FAILURE);
         return EXIT_FAILURE;
     }
-    
-    // Tous les processus analysent les arguments
-    auto params = parse_arguments(nargs-1, &args[1]);
-    
-    // Seulement le processus 0 affiche les paramètres
-    if (rank == 0) {
+
+    if (rank == 0)
         display_params(params);
-    }
     
-    // Tous les processus vérifient les paramètres
-    if (!check_params(params)) {
-        MPI_Finalize();
-        return EXIT_FAILURE;
-    }
-    
-    // Variables pour mesurer le temps
-    double total_time = 0.0;
-    int iteration_count = 0;
-    
-    if (rank == 0) {
-        // Processus d'affichage (processus 0)
-        auto displayer = Displayer::init_instance(params.discretization, params.discretization);
-        
-        // Taille des matrices à recevoir
-        int map_size = params.discretization * params.discretization;
-        
-        std::vector<unsigned> vegetal_map(map_size);
-        std::vector<unsigned> fire_map(map_size);
-        
-        MPI_Status status;
-        bool continue_simulation = true;
-        
-        while (continue_simulation) {
-            // Recevoir le statut de la simulation du processus 1
-            MPI_Recv(&continue_simulation, 1, MPI_C_BOOL, 1, 0, MPI_COMM_WORLD, &status);
-            
-            if (continue_simulation) {
-                // Recevoir les données des cartes
-                MPI_Recv(vegetal_map.data(), map_size, MPI_UNSIGNED, 1, 1, MPI_COMM_WORLD, &status);
-                MPI_Recv(fire_map.data(), map_size, MPI_UNSIGNED, 1, 2, MPI_COMM_WORLD, &status);
-                
-                // Recevoir l'étape de temps actuelle
-                int time_step;
-                MPI_Recv(&time_step, 1, MPI_INT, 1, 3, MPI_COMM_WORLD, &status);
-                
-                // Afficher les informations si nécessaire
-                if ((time_step & 31) == 0) {
-                    std::cout << "Time step " << time_step << "\n===============" << std::endl;
-                }
-                
-                // Mettre à jour l'affichage
-                displayer->update(vegetal_map, fire_map);
-                
-                // Vérifier si l'utilisateur souhaite quitter
-                SDL_Event event;
-                bool quit = false;
-                if (SDL_PollEvent(&event) && event.type == SDL_QUIT) {
-                    quit = true;
-                }
-                
-                // Envoyer le signal de quitter au processus de calcul
-                MPI_Send(&quit, 1, MPI_C_BOOL, 1, 4, MPI_COMM_WORLD);
-                
-                // Pause pour l'affichage
-                std::this_thread::sleep_for(0.1s);
+
+    if (rank == 0)
+    {
+        Model simulation(params.length,
+                         params.discretization,
+                         params.wind,
+                         params.start);
+
+        while (true)
+        {
+            bool running = simulation.update();
+
+            MPI_Send(&running, 1, MPI_C_BOOL, 1, 0, MPI_COMM_WORLD);
+
+            if (!running)
+            {
+                break;
+            }
+
+            // 3) Send updated vegetation
+            const auto &veg_map = simulation.vegetal_map();
+            MPI_Send(veg_map.data(), veg_map.size(), MPI_UNSIGNED_CHAR,
+                     1, 0, MPI_COMM_WORLD);
+
+            // 4) Send updated fire
+            const auto &fire_map = simulation.fire_map();
+            MPI_Send(fire_map.data(), fire_map.size(), MPI_UNSIGNED_CHAR,
+                     1, 0, MPI_COMM_WORLD);
+
+            if ((simulation.time_step() & 31) == 0)
+            {
+                std::cout << "[RANK 0] Time step " << simulation.time_step()
+                          << "\n====================" << std::endl;
             }
         }
-        
-        // Recevoir le temps de calcul moyen
-        MPI_Recv(&total_time, 1, MPI_DOUBLE, 1, 5, MPI_COMM_WORLD, &status);
-        MPI_Recv(&iteration_count, 1, MPI_INT, 1, 6, MPI_COMM_WORLD, &status);
-        
-        // Afficher les résultats de temps
-        if (iteration_count > 0) {
-            double avg_time = total_time / iteration_count;
-            std::cout << "Temps total de calcul: " << total_time << " secondes" << std::endl;
-            std::cout << "Nombre d'itérations: " << iteration_count << std::endl;
-            std::cout << "Temps moyen par itération: " << avg_time << " secondes" << std::endl;
-        }
     }
-    else if (rank == 1) {
-        // Processus de calcul (processus 1)
-        auto simu = Model(params.length, params.discretization, params.wind, params.start);
-        
-        // Taille des matrices à envoyer
-        int map_size = params.discretization * params.discretization;
-        
-        bool continue_simulation = true;
-        bool quit = false;
-        MPI_Status status;
-        
-        // Chronomètre pour mesurer le temps de calcul
-        auto start_time = std::chrono::high_resolution_clock::now();
-        
-        while (continue_simulation && !quit) {
-            // Mesurer le temps de cette itération
-            auto iter_start = std::chrono::high_resolution_clock::now();
-            
-            // Mettre à jour la simulation
-            continue_simulation = simu.update();
-            
-            // Mesurer le temps de fin d'itération
-            auto iter_end = std::chrono::high_resolution_clock::now();
-            std::chrono::duration<double> iter_duration = iter_end - iter_start;
-            total_time += iter_duration.count();
-            iteration_count++;
-            
-            // Envoyer le statut de la simulation au processus 0
-            MPI_Send(&continue_simulation, 1, MPI_C_BOOL, 0, 0, MPI_COMM_WORLD);
-            
-            if (continue_simulation) {
-                // Obtenir les cartes actuelles
-                auto vegetal_map = simu.vegetal_map();
-                auto fire_map = simu.fire_map();
-                
-                // Obtenir l'étape de temps actuelle
-                int time_step = simu.time_step();
-                
-                // Envoyer les données au processus d'affichage
-                MPI_Send(vegetal_map.data(), map_size, MPI_UNSIGNED, 0, 1, MPI_COMM_WORLD);
-                MPI_Send(fire_map.data(), map_size, MPI_UNSIGNED, 0, 2, MPI_COMM_WORLD);
-                MPI_Send(&time_step, 1, MPI_INT, 0, 3, MPI_COMM_WORLD);
-                
-                // Recevoir si l'utilisateur souhaite quitter
-                MPI_Recv(&quit, 1, MPI_C_BOOL, 0, 4, MPI_COMM_WORLD, &status);
+
+    else if (rank == 1)
+    {
+        auto displayer = Displayer::init_instance(
+            params.discretization,
+            params.discretization
+        );
+        bool running = true;
+        while (running)
+        {
+            MPI_Recv(&running, 1, MPI_C_BOOL, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+
+            if (!running)
+            {
+                break;
             }
+
+            std::vector<std::uint8_t> vegetation(params.discretization * params.discretization);
+            MPI_Recv(vegetation.data(), vegetation.size(), MPI_UNSIGNED_CHAR,
+                     0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+
+            std::vector<std::uint8_t> fire(params.discretization * params.discretization);
+            MPI_Recv(fire.data(), fire.size(), MPI_UNSIGNED_CHAR,
+                     0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+
+            displayer->update(vegetation, fire);
+
         }
-        
-        // Envoyer les statistiques de temps au processus 0
-        MPI_Send(&total_time, 1, MPI_DOUBLE, 0, 5, MPI_COMM_WORLD);
-        MPI_Send(&iteration_count, 1, MPI_INT, 0, 6, MPI_COMM_WORLD);
     }
-    
-    // Finaliser MPI
+
     MPI_Finalize();
-    return EXIT_SUCCESS;
+    return 0;
 }

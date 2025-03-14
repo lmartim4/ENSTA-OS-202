@@ -6,11 +6,12 @@
 
 namespace
 {
-    double pseudo_random( std::size_t index, std::size_t time_step )
+    double pseudo_random(std::size_t index, std::size_t time_step)
     {
-        std::uint_fast32_t xi = std::uint_fast32_t(index*(time_step+1));
-        std::uint_fast32_t r  = (48271*xi)%2147483647;
-        return r/2147483646.;
+        // Multiply index*((time_step+1) + 10000) removes
+        std::uint_fast32_t xi = std::uint_fast32_t(index * (10000 + time_step + 1));
+        std::uint_fast32_t r = (48271 * xi) % 2147483647;
+        return r / 2147483646.;
     }
 
     double log_factor( std::uint8_t value )

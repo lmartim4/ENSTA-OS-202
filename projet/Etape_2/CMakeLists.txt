@@ -2,8 +2,10 @@ cmake_minimum_required(VERSION 3.10)
 project(SimulationProject CXX)
 
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_COMPILER mpic++)
 
 find_package(OpenMP REQUIRED)
+find_package(MPI REQUIRED)
 
 set(CMAKE_CXX_FLAGS_DEBUG "-g -O0 -Wall -fbounds-check -pedantic -D_GLIBCXX_DEBUG")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3 -march=native -Wall")
@@ -15,4 +17,4 @@ target_compile_options(simulation.exe PRIVATE
     $<$<CONFIG:Release>:${CMAKE_CXX_FLAGS_RELEASE}>
 )
 
-target_link_libraries(simulation.exe PRIVATE pthread SDL2 OpenMP::OpenMP_CXX)
+target_link_libraries(simulation.exe PRIVATE pthread SDL2 OpenMP::OpenMP_CXX MPI::MPI_CXX)
