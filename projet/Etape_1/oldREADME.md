@@ -1,22 +1,65 @@
-# 🚀 Projet MPI + OpenMP
+# Fire Simulation Project Guide
 
-Ce dépôt contient les résultats et analyses des différentes étapes réalisées pour évaluer les performances d'une application parallèle utilisant MPI et OpenMP dans le cadre du cours **Systèmes parallèles et distribués (CSC_4OS02_TA)**.
+## Getting Started
 
-## 📁 Structure du projet
+To set up and run the fire simulation, follow these steps:
 
-Chaque dossier nommé `Etape_<X>` correspond à une étape spécifique du projet.
+### 1. Clone the Repository
+```bash
+git clone https://github.com/lmartim4/ENSTA-OS-202.git
+```
 
-À l'intérieur de chaque dossier, vous trouverez :
-- Un fichier **`README.md`** qui explique clairement :
-  - Ce qui a été réalisé dans cette étape.
-  - Les résultats obtenus et leur interprétation.
+### 2. Set Up the Virtual Environment
+```bash
+python3 -m venv tp_parallel
+source tp_parallel/bin/activate
+```
 
-En particulier, le dossier **`Etape_1`** est la base de notre travail. Il contient, en plus du README principal :
-- Des fichiers Markdown complémentaires (**`*.md`**) fournissant des explications détaillées sur :
-  - Ce que nous avons fait.
-  - Comment nous l'avons réalisé.
+### 3. Install Dependencies
+```bash
+cd projet
+pip install -r requirements.txt
+```
 
-## 🖥️ Détails du processeur
+### 4. Build the Project
+```bash
+mkdir build && cd build && cmake ../ && cd ..
+```
+
+## Running the Simulation
+To start the loop for varying OpenMP threads and generate the plots, execute:
+```bash
+./run_simulation.sh
+```
+
+### Important Note
+Before running the script, you may want to adjust parameters inside `run_simulation.sh`, such as the number of threads, simulation size, or other execution options.
+
+## Script Overview: `run_simulation.sh`
+This script performs the following tasks:
+
+1. **Cleans old logs** (if the directory exists).
+2. **Builds the project** using CMake.
+3. **Runs the simulation** with different numbers of OpenMP threads.
+4. **Generates speedup and result plots** using Python.
+
+### Modifications
+You may want to modify the following parameters in the script:
+- `OMP_NUM_THREADS` values inside the `for` loop.
+- Simulation parameters (`-n 1000 -s 500,500`).
+- Paths to scripts if needed.
+
+## Output
+After execution, the script will generate:
+- Logs of the simulations.
+- Speedup plots comparing execution times.
+- CSV plots showing performance data.
+
+For further customizations, edit the parameters in `run_simulation.sh` accordingly.
+
+---
+
+### Details Processuer
 
 Le projet a été simulé dans ce processeur ci-dessous:
 
@@ -67,9 +110,3 @@ Le projet a été simulé dans ce processeur ci-dessous:
 | Spectre v2 | Mitigation; Retpolines; IBPB conditional; STIBP always-on; RSB filling; PBRSB-eIBRS Not affected; BHI Not affected |
 | Srbds | Not affected |
 | Tsx async abort | Not affected |
-
-## **Students**
-Ce projet a été réalisé par :
-- **Lucas de Oliveira Martim**
-- **Rodrigo Botelho Zuiani**
-
