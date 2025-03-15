@@ -30,7 +30,7 @@ Pour chaque N, on dispose d’un tracé qui montre la variation de l’accélér
 
 
 
-![](plot_benchmarkAnalysis_100.png)| ![](plot_benchmarkAnalysis_200.png) | ![](plot_benchmarkAnalysis_400.png)
+![](logs_100/plot_benchmarkAnalysis_100.png)| ![](logs_200/plot_benchmarkAnalysis_200.png) | ![](logs_400/plot_benchmarkAnalysis_400.png)
 |---------------------------|---------------------------|---------------------------|
 
 
