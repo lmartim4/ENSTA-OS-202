@@ -4,7 +4,7 @@
 - Repartez de la version originale du code
 - Mettre en place l'environnement MPI dans votre code
 - Séparez l'affichage qui sera fait par le processus n°0 du calcul qui sera fait par les processus de numéro non nuls.
-- Testez le code avec deux processus et  mesurez le temps global moyen pris par itération en temps.
+- Testez le code avec deux processus et  mesurez 
 - Interprétez votre résultat par rapport au temps global mesuré sur le code d'origine.
 
 ### Troisième étape 

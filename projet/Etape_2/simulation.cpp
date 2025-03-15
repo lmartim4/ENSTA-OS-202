@@ -8,6 +8,10 @@
 
 #include "model.hpp"
 #include "display.hpp"
+#include "profiler.hpp"
+
+constexpr int UPDATE_RANK   = 1;
+constexpr int DISPLAY_RANK  = 0;
 
 using namespace std::string_literals;
 using namespace std::chrono_literals;
@@ -194,6 +198,7 @@ void display_params(ParamsType const& params)
               << "\tPosition initiale du foyer (col, ligne) : " << params.start.column << ", " << params.start.row << std::endl;
 }
 
+
 int main(int argc, char* argv[])
 {
     MPI_Init(&argc, &argv);
@@ -209,72 +214,121 @@ int main(int argc, char* argv[])
         return EXIT_FAILURE;
     }
 
-    if (rank == 0)
-        display_params(params);
-    
-
-    if (rank == 0)
+    if (rank == UPDATE_RANK)
     {
-        Model simulation(params.length,
-                         params.discretization,
-                         params.wind,
-                         params.start);
+        display_params(params);
+        std::cout << "Running with " << size << " process(es)\n";
+    }
+
+    Profiler profiler("rank" + std::to_string(rank), "Profiling data for rank " + std::to_string(rank) + " of " + std::to_string(size)  + "\n");
+
+    if (rank == UPDATE_RANK)
+    {
+        Model simulation(params.length, params.discretization, params.wind, params.start);
+
+        int iteration_count = 0;
+        double total_time_accumulator = 0.0;
 
         while (true)
         {
-            bool running = simulation.update();
+            profiler.start("total");
 
-            MPI_Send(&running, 1, MPI_C_BOOL, 1, 0, MPI_COMM_WORLD);
+            auto iteration_begin = std::chrono::high_resolution_clock::now();
+
+            profiler.start("update");
+            bool running = simulation.update();
+            profiler.stop("update");
+
+            MPI_Send(&running, 1, MPI_C_BOOL, DISPLAY_RANK, 0, MPI_COMM_WORLD);
 
             if (!running)
             {
+                profiler.stop("total");
                 break;
             }
 
-            // 3) Send updated vegetation
             const auto &veg_map = simulation.vegetal_map();
-            MPI_Send(veg_map.data(), veg_map.size(), MPI_UNSIGNED_CHAR,
-                     1, 0, MPI_COMM_WORLD);
+            MPI_Send(veg_map.data(),
+                     veg_map.size(),
+                     MPI_UNSIGNED_CHAR,
+                     DISPLAY_RANK, 0,
+                     MPI_COMM_WORLD);
 
-            // 4) Send updated fire
             const auto &fire_map = simulation.fire_map();
-            MPI_Send(fire_map.data(), fire_map.size(), MPI_UNSIGNED_CHAR,
-                     1, 0, MPI_COMM_WORLD);
+            MPI_Send(fire_map.data(),
+                     fire_map.size(),
+                     MPI_UNSIGNED_CHAR,
+                     DISPLAY_RANK, 0,
+                     MPI_COMM_WORLD);
 
-            if ((simulation.time_step() & 31) == 0)
-            {
-                std::cout << "[RANK 0] Time step " << simulation.time_step()
-                          << "\n====================" << std::endl;
-            }
+            profiler.stop("total");
+
+            profiler.log(simulation.time_step());
+
+            auto iteration_end   = std::chrono::high_resolution_clock::now();
+            auto elapsed_in_us   = std::chrono::duration_cast<std::chrono::microseconds>(
+                                       iteration_end - iteration_begin
+                                   ).count();
+            double elapsed_in_ms = static_cast<double>(elapsed_in_us) / 1000.0;
+
+            total_time_accumulator += elapsed_in_ms;
+            iteration_count++;
+        }
+
+        if (iteration_count > 0)
+        {
+            double average_ms = total_time_accumulator / iteration_count;
+            std::cout << "\n[Rank " << rank << "]"
+                      << " Average iteration time: "
+                      << average_ms << " ms\n";
         }
     }
 
-    else if (rank == 1)
+    else if (rank == DISPLAY_RANK)
     {
         auto displayer = Displayer::init_instance(
             params.discretization,
             params.discretization
         );
+
         bool running = true;
+        int step = 0;
+
         while (running)
         {
-            MPI_Recv(&running, 1, MPI_C_BOOL, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            profiler.start("total");
+ 
+            MPI_Recv(&running, 1, MPI_C_BOOL, UPDATE_RANK, 0,
+                     MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
             if (!running)
             {
+                profiler.stop("total");
                 break;
             }
 
             std::vector<std::uint8_t> vegetation(params.discretization * params.discretization);
-            MPI_Recv(vegetation.data(), vegetation.size(), MPI_UNSIGNED_CHAR,
-                     0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            MPI_Recv(vegetation.data(),
+                     vegetation.size(),
+                     MPI_UNSIGNED_CHAR,
+                     UPDATE_RANK, 0,
+                     MPI_COMM_WORLD,
+                     MPI_STATUS_IGNORE);
 
             std::vector<std::uint8_t> fire(params.discretization * params.discretization);
-            MPI_Recv(fire.data(), fire.size(), MPI_UNSIGNED_CHAR,
-                     0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            MPI_Recv(fire.data(),
+                     fire.size(),
+                     MPI_UNSIGNED_CHAR,
+                     UPDATE_RANK, 0,
+                     MPI_COMM_WORLD,
+                     MPI_STATUS_IGNORE);
 
+            profiler.start("display");
             displayer->update(vegetation, fire);
+            profiler.stop("display");
 
+            profiler.stop("total");
+            profiler.log(step++);
         }
     }
 

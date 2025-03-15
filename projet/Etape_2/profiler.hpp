@@ -1,3 +1,4 @@
+#include <filesystem>
 #include <chrono>
 #include <fstream>
 #include <iostream>
@@ -8,11 +9,11 @@
 class Profiler
 {
 public:
-    Profiler(const std::string &header)
+    Profiler(const std::string &process_rank, const std::string &header)
     {
         std::filesystem::create_directories("../logs");
 
-        csv_file = std::ofstream("../logs/" + get_timestamp_filename(), std::ios::out);
+        csv_file = std::ofstream("../logs/" + process_rank + "-" + get_timestamp_filename(), std::ios::out);
         if (!csv_file.is_open())
         {
             std::cerr << "Unable to open CSV file for profiling" << std::endl;
