@@ -21,7 +21,7 @@ struct ParamsType
     double length{1.};
     unsigned discretization{20u};
     std::array<double,2> wind{0.,0.};
-    Model::LexicoIndices start{10u,10u};
+    Model::Coordinates start{10u,10u};
 };
 
 void analyze_arg( int nargs, char* args[], ParamsType& params )
@@ -254,7 +254,7 @@ int main(int argc, char* argv[])
                      DISPLAY_RANK, 0,
                      MPI_COMM_WORLD);
 
-            const auto &fire_map = simulation.fire_map();
+            const auto &fire_map = simulation.get_fire_map();
             MPI_Send(fire_map.data(),
                      fire_map.size(),
                      MPI_UNSIGNED_CHAR,
@@ -263,7 +263,7 @@ int main(int argc, char* argv[])
 
             profiler.stop("total");
 
-            profiler.log(simulation.time_step());
+            profiler.log(simulation.get_time_step());
 
             auto iteration_end   = std::chrono::high_resolution_clock::now();
             auto elapsed_in_us   = std::chrono::duration_cast<std::chrono::microseconds>(
